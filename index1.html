@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToneCheck | Say it better. Sound kinder.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --primary: #6366f1;
+            --text-dark: #1e293b;
+            --positive: #22c55e;
+            --warning: #f59e0b;
+            --negative: #ef4444;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 2.5rem;
+        }
+
+        .input-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #analyzeBtn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        #analyzeBtn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .result-card {
+            margin-top: 30px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .hidden { display: none; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .suggestion-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .suggestion-bubble {
+            background: #f1f5f9;
+            padding: 18px;
+            border-left: 5px solid var(--primary);
+            border-radius: 4px 12px 12px 4px;
+            font-style: italic;
+            color: #334155;
+        }
+
+        .secondary-btn {
+            background-color: #e2e8f0;
+            color: #475569;
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        .secondary-btn:hover {
+            background-color: #cbd5e1;
+        }
+
+        .copy-success {
+            background-color: var(--positive) !important;
+            color: white !important;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>ToneCheck 🗣️</h1>
+            <p>Reflect on your words. Enhance your connection.</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <textarea id="userInput" placeholder="Type a message that might be misunderstood... (e.g. 'This is wrong, fix it.')"></textarea>
+                <button id="analyzeBtn">Check Message Tone</button>
+            </div>
+
+            <div id="resultCard" class="result-card hidden">
+                <div id="toneBadge" class="status-badge">Neutral</div>
+                
+                <section>
+                    <h3 style="margin-top:0">Impact Analysis</h3>
+                    <p id="impactText"></p>
+                </section>
+
+                <section class="suggestion">
+                    <h3>Kinder Alternative</h3>
+                    <div class="suggestion-container">
+                        <div class="suggestion-bubble">
+                            <p id="suggestionText" style="margin:0"></p>
+                        </div>
+                        <button id="copyBtn" class="secondary-btn">Copy Suggestion</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer>
+            <p>Built for United Hacks • Original Work • 2024</p>
+        </footer>
+    </div>
+
+    <script>const toneData = {
+            aggressive: {
+                // Expanded keyword list to catch hostility and profanity
+                keywords: [
+                    'late', 'lazy', 'wrong', 'bad', 'never', 'fix', 'do it', 'stop', 
+                    'slow', 'fail', 'terrible', 'useless', 'hurry', 'hate', 'stupid', 
+                    'idiot', 'motherfucker', 'shut up', 'annoying', 'dumb', 'gross',
+                    'anyway', 'not doing', 'don\'t care'
+                ],
+                impact: "This message contains hostile language or extreme negativity. This will likely damage your relationship and stop productive communication.",
+                suggestions: [
+                    "I’m feeling frustrated right now, but I’d like to find a better way to handle this.",
+                    "I'm currently unable to do this, but perhaps we can discuss why later.",
+                    "I'm having a hard time with this situation. Can we take a break and talk later?",
+                    "I respectfully disagree with the current direction."
+                ]
+            },
+            positive: {
+                keywords: ['thanks', 'great', 'awesome', 'please', 'happy', 'love', 'excellent', 'appreciate', 'kind', 'good', 'well done'],
+                impact: "Your message is warm and supportive! This builds trust and encourages the other person.",
+                suggestions: ["Your message is already great! It promotes positive human interaction."]
+            }
+        };
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const userInput = document.getElementById('userInput');
+        const resultCard = document.getElementById('resultCard');
+
+        analyzeBtn.addEventListener('click', () => {
+            const text = userInput.value.toLowerCase();
+            
+            if (!text.trim()) {
+                alert("Please enter a message to analyze.");
+                return;
+            }
+
+            let tone = "Neutral & Clear";
+            let impact = "Your message is straightforward. While not negative, adding a 'please' or 'thank you' can further enhance the connection.";
+            let suggestion = "Consider adding a brief greeting or a closing 'thanks' to soften the directness.";
+            let badgeColor = "#64748b"; // Slate gray
+
+            // Logic check
+            const isAggressive = toneData.aggressive.keywords.some(word => text.includes(word));
+            const isPositive = toneData.positive.keywords.some(word => text.includes(word));
+
+            if (isAggressive) {
+                tone = "Critically Tense";
+                impact = toneData.aggressive.impact;
+                const randomLines = toneData.aggressive.suggestions;
+                suggestion = randomLines[Math.floor(Math.random() * randomLines.length)];
+                badgeColor = "#f59e0b"; // Amber warning
+            } else if (isPositive) {
+                tone = "Positive & Empathetic";
+                impact = toneData.positive.impact;
+                suggestion = toneData.positive.suggestions[0];
+                badgeColor = "#22c55e"; // Success green
+            }
+
+            // Update UI
+            document.getElementById('toneBadge').innerText = tone;
+            document.getElementById('toneBadge').style.backgroundColor = badgeColor;
+            document.getElementById('toneBadge').style.color = "white";
+            document.getElementById('impactText').innerText = impact;
+            document.getElementById('suggestionText').innerText = suggestion;
+            
+            resultCard.classList.remove('hidden');
+            resultCard.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Copy functionality
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = document.getElementById('suggestionText').innerText;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const prevText = copyBtn.innerText;
+                copyBtn.innerText = "Copied to Clipboard! ✓";
+                copyBtn.classList.add('copy-success');
+
+                setTimeout(() => {
+                    copyBtn.innerText = prevText;
+                    copyBtn.classList.remove('copy-success');
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>>
